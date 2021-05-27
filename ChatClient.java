@@ -1,12 +1,24 @@
 import java.io.IOException;
 import java.net.Socket;
 
-public class ConnectorClient extends Connector {
+/**
+ * An object representing the Client Connector
+ * 
+ * @author youngAgFox
+ *
+ */
+public class Client extends Connector {
 
 	private String ip;
 	private int port;
 
-	public ConnectorClient(String ip, int port) {
+	/**
+	 * Connects this Client Connector to the Host Connector.
+	 * 
+	 * @param ip the ip address to connect to
+	 * @param port the port to connect to
+	 */
+	public Client(String ip, int port) {
 		this.ip = ip;
 		this.port = port;
 	}

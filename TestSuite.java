@@ -5,16 +5,16 @@ public class TestSuite {
 
 	@Test
 	public void testConnection() {
-		ConnectorServer server = new ConnectorServer();
-		ConnectorClient client = new ConnectorClient(server.getIP(), server.getPort());
+		Server server = new Server();
+		Client client = new Client(server.getIP(), server.getPort());
 		connect(server, client);
 		assertEquals(true, server.isConnected());
 	}
 
 	@Test
 	public void testWriteRead() {
-		ConnectorServer server = new ConnectorServer();
-		ConnectorClient client = new ConnectorClient(server.getIP(), server.getPort());
+		Server server = new Server();
+		Client client = new Client(server.getIP(), server.getPort());
 		connect(server, client);
 		final String test = "TestABC123";
 		server.write(test);
@@ -59,18 +59,18 @@ public class TestSuite {
 		}
 	}
 
-	private void connect(ConnectorServer server, ConnectorClient client) {
-		Client threadClient = new Client(client);
+	private void connect(Server server, Client client) {
+		TestClient threadClient = new TestClient(client);
 		Thread thread = new Thread(threadClient);
 		thread.start();
 		server.connect();
 	}
 
-	private class Client implements Runnable {
+	private class TestClient implements Runnable {
 		
-		ConnectorClient client;
+		Client client;
 
-		public Client(ConnectorClient client) {
+		public TestClient(Client client) {
 			this.client = client;
 		}
 

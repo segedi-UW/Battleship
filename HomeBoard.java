@@ -3,12 +3,21 @@ import java.util.Hashtable;
 import javafx.scene.control.Label;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * An object that represents the Home Grid including the user's ships.
+ * 
+ * @author youngAgFox
+ *
+ */
 public class HomeBoard extends Board {
 	
 	private Hashtable<Point, Ship> ships;
 	private Hashtable<Point, Label> spaces;
 	private Encoder.Code lastCode;
 
+	/**
+	 * Creates the HomeBoard with no ships.
+	 */
 	public HomeBoard() {
 		ships = new Hashtable<>();
 	}
@@ -29,6 +38,12 @@ public class HomeBoard extends Board {
 		return label;
 	}
 	
+	/**
+	 * Adds a ship to the board if there is no ship with an associated point already.
+	 * 
+	 * @param ship the ship to add.
+	 * @throws IllegalArgumentException if any point is associated with a different ship.
+	 */
 	public void addShip(Ship ship) {
 		Point[] points = ship.getPoints();
 		for (int i = 0; i < points.length; i++) {
@@ -43,10 +58,20 @@ public class HomeBoard extends Board {
 		}
 	}
 	
+	/**
+	 * Returns the number of ships in this board.
+	 * 
+	 * @return the number of ships.
+	 */
 	public int size() {
 		return ships.size();
 	}
 	
+	/**
+	 * Removes a ship from the board.
+	 * 
+	 * @param ship the ship to remove.
+	 */
 	public void removeShip(Ship ship) {
 		Point[] points = ship.getPoints();
 		for (int i = 0; i < points.length; i++) {
@@ -55,6 +80,12 @@ public class HomeBoard extends Board {
 		}
 	}
 	
+	/**
+	 * Attacks the board at a given point, updating the code to the
+	 * appropriate value (HIT, MISS, or SUNK).
+	 * 
+	 * @param point the point attacked.
+	 */
 	public void attack(Point point) {
 		Ship ship = ships.get(point);
 		Label space = spaces.get(point);
@@ -77,6 +108,11 @@ public class HomeBoard extends Board {
 		}
 	}
 	
+	/**
+	 * Returns the result of the last call of the attack(Point) method.
+	 * 
+	 * @return the last code saved as a result of the attack(Point) method call.
+	 */
 	public Encoder.Code getLastCode() {
 		return lastCode;
 	}

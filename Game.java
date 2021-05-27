@@ -5,6 +5,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 
+/**
+ * An object that represents a Battleship Game.
+ * 
+ * @author youngAgFox
+ *
+ */
 public class Game {
 
 	public enum Gamemode {
@@ -21,8 +27,20 @@ public class Game {
 
 	private boolean isOpponentReady;
 
+	/**
+	 * Creates a new Game with the Standard gamemode.
+	 */
 	public Game() {
-		gamemode = Gamemode.STANDARD;
+		this(Gamemode.STANDARD);
+	}
+	
+	/**
+	 * Creates a new Game with the given gamemode.
+	 * 
+	 * @param gamemode the gamemode
+	 */
+	public Game(Gamemode gamemode) {
+		this.gamemode = gamemode;
 		isTurn = false;
 		console = createConsole();
 		board = new HomeBoard();
@@ -30,6 +48,12 @@ public class Game {
 		ships = 5;
 	}
 
+	/**
+	 * Creates the TextArea console for notification to the user of game events and
+	 * actions.
+	 * 
+	 * @return TextArea display of the console
+	 */
 	private TextArea createConsole() {
 		final int height = 100;
 		final int width = 200;
@@ -45,6 +69,11 @@ public class Game {
 		return area;
 	}
 
+	/**
+	 * Fires at the given point.
+	 * 
+	 * @param point to fire upon.
+	 */
 	public void fire(Point point) {
 		if (!isOpponentReady)
 			log("Waiting for Opponent...");
@@ -58,16 +87,45 @@ public class Game {
 		}
 	}
 
+	/**
+	 * Returns if it is this users turn.
+	 * 
+	 * @return true if it is this users turn, false otherwise.
+	 */
 	public boolean isTurn() {
 		return isTurn;
 	}
 
-	private void enemyAttack(Point point) {
+	/**
+	 * Processes an enemy attack at a particular point.
+	 * 
+	 * @param point the point attacked.
+	 */
+	private void processEnemyAttack(Point point) {
 		String text = "The enemy has fired upon us!";
 		log(text);
-		board.attack(point);
+		
+		board.attack(point); // Sets the lastCode
+		
 		Encoder.Code code = board.getLastCode();
+		processEnemyAttackCode(code);
 
+		connection.write(Encoder.encodeState(code));
+		
+		if (ships == 0) {
+			String lostMessage = "We have lost Commander...";
+			log(lostMessage);
+			
+			connection.write(Encoder.encodeState(Encoder.Code.LOST));
+		}
+	}
+	
+	/**
+	 * Processes the state code for an enemy attack.
+	 * 
+	 * @param code the state code.
+	 */
+	private void processEnemyAttackCode(Encoder.Code code) {
 		if (code == Encoder.Code.MISS)
 			log("They missed!");
 		else if (code == Encoder.Code.HIT)
@@ -78,19 +136,21 @@ public class Game {
 			log("We have " + ships + " ships left Commander.");
 		} else
 			throw new IllegalArgumentException("lastCode was invalid: " + code);
-
-		connection.write(Encoder.encodeState(code));
-		if (ships == 0) {
-			log("We have lost Commander...");
-			connection.write(Encoder.encodeState(Encoder.Code.LOST));
-		}
 	}
 
+	/**
+	 * Sets this games connector.
+	 * 
+	 * @param connector to use.
+	 */
 	public void setConnector(Connector connector) {
 		connection = connector;
 		setupConnection();
 	}
 
+	/**
+	 * Adds the connection message listener.
+	 */
 	private void setupConnection() {
 		final boolean HIT = true;
 		final boolean MISSED = false;
@@ -100,7 +160,7 @@ public class Game {
 			Encoder.Code code = Encoder.parseCode(message);
 			if (code == Encoder.Code.ATTACK) {
 				Point point = Encoder.decodeAttack(message);
-				enemyAttack(point);
+				processEnemyAttack(point);
 			} else if (code == Encoder.Code.HIT) {
 				String text = "Enemy ship hit!";
 				log(text);
@@ -136,18 +196,27 @@ public class Game {
 		});
 	}
 
+	/**
+	 * Notifies the opponent it is their turn.
+	 */
 	private void sendTurn() {
 		connection.write(Encoder.encodeState(Encoder.Code.TURN_START));
 		String text = "...Waiting on opponent...";
 		log(text);
 	}
 
+	/**
+	 * Starts this users turn.
+	 */
 	private void startTurn() {
 		isTurn = true;
 		String text = "Captain what are your orders!";
 		log(text);
 	}
 
+	/**
+	 * Starts the Gui process for setup of ships.
+	 */
 	private void setupShips() {
 		Platform.runLater(() -> {
 			ShipDialog dialog = null;
@@ -182,6 +251,12 @@ public class Game {
 		});
 	}
 
+	/**
+	 * Sets up a ship using a ShipDialog.
+	 * 
+	 * @param dialog the dialog to use.
+	 * @throws Exception if the setup is canceled.
+	 */
 	private void setupShip(ShipDialog dialog) throws Exception {
 		Optional<Boolean> response = dialog.showAndWait();
 		if (!response.isPresent()) {
@@ -194,16 +269,31 @@ public class Game {
 		}
 	}
 
+	/**
+	 * Logs to the console.
+	 * 
+	 * @param text the text to log.
+	 */
 	public void log(String text) {
 		final double END = 1.0;
 		console.appendText(text + "\n");
 		console.setScrollTop(END);
 	}
 
+	/**
+	 * Returns the in use Connector.
+	 * 
+	 * @return the Connector currently used by the Game.
+	 */
 	public Connector getConnector() {
 		return connection;
 	}
 
+	/**
+	 * Starts a new Game, if isFirst is true then this user is then prompted to start their turn.
+	 * 
+	 * @param isFirst if this user is first.
+	 */
 	public void startGame(boolean isFirst) {
 		setupShips();
 		ships = 5;
@@ -211,6 +301,11 @@ public class Game {
 			startTurn();
 	}
 
+	/**
+	 * Returns the console display.
+	 * 
+	 * @return the VBox display of the console.
+	 */
 	public VBox getConsole() {
 		Button clear = new Button("Clear");
 		clear.setOnAction(event -> {
@@ -219,10 +314,20 @@ public class Game {
 		return new VBox(console, clear);
 	}
 
+	/**
+	 * Returns the in use HomeBoard.
+	 * 
+	 * @return the current HomeBoard.
+	 */
 	public HomeBoard getBoard() {
 		return board;
 	}
 
+	/**
+	 * Returns the in use TargetBoard.
+	 * 
+	 * @return the current TargetBoard.
+	 */
 	public TargetBoard getTarget() {
 		return target;
 	}

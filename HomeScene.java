@@ -8,17 +8,32 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+
+/**
+ * An object that creates the Home Screen for the Gui.
+ * 
+ * @author youngAgFox
+ *
+ */
 public class HomeScene {
 
 	private static final int HOME_SIZE = 500;
 
 	private Scene scene;
 
+	/**
+	 * Creates the Home Screen Scene.
+	 * 
+	 * @return the Home Screen Scene.
+	 */
 	public static Scene create() {
 		HomeScene home = new HomeScene();
 		return home.scene;
 	}
 
+	/**
+	 * Creates the Home Screen Scene.
+	 */
 	private HomeScene() {
 		BorderPane borderPane = new BorderPane();
 		scene = new Scene(borderPane, HOME_SIZE, HOME_SIZE);
@@ -26,6 +41,11 @@ public class HomeScene {
 		addCenter(borderPane);
 	}
 	
+	/**
+	 * Adds the center panel to the borderPane.
+	 * 
+	 * @param borderPane the BorderPane to add to.
+	 */
 	private void addCenter(BorderPane borderPane) {
 		final double SPACING = 15.0;
 
@@ -39,6 +59,11 @@ public class HomeScene {
 		borderPane.setCenter(vbox);
 	}
 
+	/**
+	 * Adds the title text to the VBox.
+	 * 
+	 * @param vbox the VBox to add to.
+	 */
 	private void addTitle(VBox vbox) {
 		Label label = new Label("BATTLESHIP");
 		final int FONT_SIZE = 50;
@@ -50,6 +75,11 @@ public class HomeScene {
 		list.add(label);
 	}
 
+	/**
+	 * Adds the button to the VBox.
+	 * 
+	 * @param vbox the VBox to add to.
+	 */
 	private void addButtons(VBox vbox) {
 		final double WIDTH = 150.0;
 		final double HEIGHT = 50.0;
@@ -81,6 +111,9 @@ public class HomeScene {
 		list.add(exit);
 	}
 
+	/**
+	 * Shows the Help Screen.
+	 */
 	private void showHelp() {
 		String title = "Help";
 		String message = "Welcome to Battleship!\n" + 

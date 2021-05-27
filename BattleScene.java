@@ -11,6 +11,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+/**
+ * Creates the Scene object that is used for Battleship game play.
+ * 
+ * @author youngAgFox
+ *
+ */
 public class BattleScene {
 
 	private static final int BATTLE_SIZE = 800;
@@ -19,11 +25,19 @@ public class BattleScene {
 	private BorderPane pane;
 	private Game game;
 
+	/**
+	 * Creates the battle Scene and returns it to the caller
+	 * 
+	 * @return the battle (game play) Scene object
+	 */
 	public static Scene create() {
 		BattleScene battle = new BattleScene();
 		return battle.scene;
 	}
 
+	/**
+	 * Constructs the BattleScene with the current game
+	 */
 	private BattleScene() {
 		pane = new BorderPane();
 		scene = new Scene(pane, BATTLE_SIZE, BATTLE_SIZE);
@@ -32,6 +46,9 @@ public class BattleScene {
 		createBattleScene();
 	}
 
+	/**
+	 * Adds all panels to the Scene object
+	 */
 	private void createBattleScene() {
 		addBattleTop();
 		addBattleCenter();
@@ -39,6 +56,9 @@ public class BattleScene {
 		addBattleRight();
 	}
 
+	/**
+	 * Adds the top panel to the Scene
+	 */
 	private void addBattleTop() {
 		Label label = new Label("Battleship Terminal");
 		label.setAlignment(Pos.CENTER);
@@ -46,6 +66,9 @@ public class BattleScene {
 		BorderPane.setAlignment(label, Pos.CENTER);
 	}
 
+	/**
+	 * Adds the center panel to the Scene
+	 */
 	private void addBattleCenter() {
 		
 		VBox vbox = new VBox();
@@ -67,11 +90,17 @@ public class BattleScene {
 		pane.setCenter(vbox);
 	}
 
+	/**
+	 * Adds the left panel to the Scene
+	 */
 	private void addBattleLeft() {
 		Chat chat = new Chat(game.getConnector());
 		pane.setLeft(chat.getDisplay());
 	}
 
+	/**
+	 * Adds the right panel to the Scene
+	 */
 	private void addBattleRight() {
 		// TODO
 		BackgroundFill redFill = new BackgroundFill(Color.RED, null, null);

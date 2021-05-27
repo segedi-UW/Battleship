@@ -6,6 +6,12 @@ import javafx.scene.paint.Color;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 
+/**
+ * Object that represents the targeting grid.
+ * 
+ * @author youngAgFox
+ *
+ */
 public class TargetBoard extends Board {
 
 	private CoordButton selected;
@@ -28,9 +34,24 @@ public class TargetBoard extends Board {
 		return button;
 	}
 
+	/**
+	 * Adds all highlighting to a CoordButton.
+	 * 
+	 * @param coordButton the button to add to.
+	 */
 	private void addHighlight(CoordButton coordButton) {
+		addMouseEnteredHighlight(coordButton);
+		addMouseExitHighlight(coordButton);
+	}
+	
+	/**
+	 * Adds the mouse entered highlighting to a CoordButton.
+	 * 
+	 * @param coordButton the button to add to.
+	 */
+	private void addMouseEnteredHighlight(CoordButton coordButton) {
 		Button button = coordButton.BUTTON;
-
+		
 		button.setOnMouseEntered(new EventHandler<MouseEvent>() {
 			private CoordButton gridButton = coordButton;
 
@@ -46,7 +67,16 @@ public class TargetBoard extends Board {
 				button.setBackground(background);
 			}
 		});
-
+	}
+	
+	/**
+	 * Adds the mouse exit highlighting to a CoordButton.
+	 * 
+	 * @param coordButton the button to add to.
+	 */
+	private void addMouseExitHighlight(CoordButton coordButton) {
+		Button button = coordButton.BUTTON;
+		
 		button.setOnMouseExited(new EventHandler<MouseEvent>() {
 			private CoordButton gridButton = coordButton;
 
@@ -64,6 +94,11 @@ public class TargetBoard extends Board {
 		});
 	}
 
+	/**
+	 * Selects the passed CoordButton.
+	 * 
+	 * @param button the button to select.
+	 */
 	private void selectButton(CoordButton button) {
 		if (canSelect) {
 			if (button.isSelectable) {
@@ -81,10 +116,18 @@ public class TargetBoard extends Board {
 		}
 	}
 	
+	/**
+	 * Stops the change of selection until the fire method is called.
+	 */
 	public void waitForFire() {
 		canSelect = false;
 	}
 
+	/**
+	 * Sets the selected CoordButton's background to the passed color.
+	 * 
+	 * @param color the color to use in the new background.
+	 */
 	private void setSelectedBackground(Color color) {
 		BackgroundFill fill = new BackgroundFill(color, null, null);
 		Background background = new Background(fill);
@@ -94,6 +137,11 @@ public class TargetBoard extends Board {
 		}
 	}
 	
+	/**
+	 * Paints the selected space blue if hit is false, red if hit is true.
+	 * 
+	 * @param hit whether the shot hit an enemy or not.
+	 */
 	public void fire(boolean hit) {
 		selected.isSelectable = false;
 		Color color = hit ? Color.RED : Color.AQUAMARINE;
@@ -102,6 +150,11 @@ public class TargetBoard extends Board {
 		canSelect = true;
 	}
 
+	/**
+	 * Sets the selection action on a CoordButton click.
+	 * 
+	 * @param coordButton the CoordButton to add the behavior to.
+	 */
 	private void setTargetAction(CoordButton coordButton) {
 		Button button = coordButton.BUTTON;
 		button.setOnAction( e ->  {
@@ -109,10 +162,22 @@ public class TargetBoard extends Board {
 		});
 	}
 	
+	/**
+	 * Returns the currently selected CoordButton's point.
+	 * 
+	 * @return the Point of the selected CoordButton.
+	 */
 	public Point getSelectedPoint() {
 		return selected == null ? null : selected.POINT;
 	}
 
+	/**
+	 * An object representing a Button that has a coordinate (Point), a default color, and 
+	 * a field that filters selection.
+	 * 
+	 * @author youngAgFox
+	 *
+	 */
 	private class CoordButton {
 		private final Point POINT;
 		private final Button BUTTON;

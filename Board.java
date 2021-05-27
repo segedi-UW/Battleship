@@ -8,6 +8,14 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.Node;
 import javafx.geometry.Pos;
 
+/**
+ * Provides a Border and some Backgrounds for general use, and is responsible for
+ * populating the GridPane that makes up the grid. The Node objects added are from
+ * subclasses that override createGridNode(Point).
+ * 
+ * @author youngAgFox
+ *
+ */
 public abstract class Board {
 	
 	private GridPane pane;
@@ -35,14 +43,21 @@ public abstract class Board {
 	private static final BackgroundFill FILL_ROYALBLUE = new BackgroundFill(Color.ROYALBLUE, null, null);
 	protected static final Background BACKGROUND_ROYALBLUE = new Background(FILL_ROYALBLUE);
 	
+	/**
+	 * Constructs a new Board with centered alignment and no background.
+	 */
 	public Board() {
 		pane = new GridPane();
 		pane.setAlignment(Pos.CENTER);
 		pane.setBackground(null);
-		makeBoard();
+		createGrid();
 	}
 
-	private void makeBoard() {
+	/**
+	 * Creates the grid that makes up the board, calling the 
+	 * createGridNode(Point) method for each Node object.
+	 */
+	private void createGrid() {
 		for (int column = 0; column < LENGTH; column++) {
 			for (int row = 0; row < LENGTH; row++) {
 				Point p = new Point(column, row);
@@ -52,8 +67,19 @@ public abstract class Board {
 		}
 	}
 
-	public abstract Node createGridNode(Point p);
+	/**
+	 * Creates a Node that on its return will be added to the grid.
+	 * 
+	 * @param point the point this object is being added to.
+	 * @return the Node object to add to the grid.
+	 */
+	public abstract Node createGridNode(Point point);
 	
+	/**
+	 * Returns the GridPane object representing the board grid.
+	 * 
+	 * @return the GridPane object representing the grid.
+	 */
 	public GridPane getPane() {
 		return pane;
 	}
