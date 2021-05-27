@@ -5,109 +5,129 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
-import javafx.event.ActionEvent;
 
 public class TargetBoard extends Board {
 
 	private CoordButton selected;
-	private boolean isActive;
-
-	private Background orangeBackground; 
-
-	public TargetBoard() {
-		super();
-		BackgroundFill orangeFill = new BackgroundFill(Color.rgb(130, 40, 120, 0.3), null, null);
-		orangeBackground = new Background(orangeFill);
-	}
+	private Color selectedPreviousColor;
+	private boolean canSelect = true;
 
 	@Override
-	public Node createGridNode(int column, int row) {
-		CoordButton button = new CoordButton(column, row);
-		button.setBackground(whiteBackground);
-		button.setBorder(border);
+	public Node createGridNode(Point p) {
+		CoordButton coordButton = new CoordButton(p);
+		Button button = coordButton.BUTTON;
+		final int INT_a = 'a';
+		char column = (char) (p.column + INT_a);
+		int row = p.row;
+		button.setText("" + column + row);
+		button.setBackground(BACKGROUND_WHITE);
+		button.setBorder(BORDER);
 		button.setMinSize(WIDTH, HEIGHT);
-		setTargetAction(button);
-		addHighlight(button);
+		setTargetAction(coordButton);
+		addHighlight(coordButton);
 		return button;
 	}
 
-	private void addHighlight(Button button) {
-
-		BackgroundFill highlightFill = new BackgroundFill(Color.rgb(100, 200, 200, 0.3), null, null);
-		Background highlightBackground = new Background(highlightFill);
-		BackgroundFill inactiveHighlightFill = new BackgroundFill(Color.rgb(100, 100, 100, 0.3), null, null);
-		Background inactiveHighlightBackground = new Background(inactiveHighlightFill);
-		BackgroundFill whiteFill = new BackgroundFill(Color.WHITE, null, null);
-		Background whiteBackground = new Background(whiteFill);
+	private void addHighlight(CoordButton coordButton) {
+		Button button = coordButton.BUTTON;
 
 		button.setOnMouseEntered(new EventHandler<MouseEvent>() {
-			private Button gridButton = button;
-			private Background inactiveHighlight = inactiveHighlightBackground;
-			private Background activeHighlight = highlightBackground;
+			private CoordButton gridButton = coordButton;
 
 			@Override
 			public void handle(MouseEvent event) {
-				if (isActive)
-					gridButton.setBackground(activeHighlight);
-				else
-					gridButton.setBackground(inactiveHighlight);
+				Color color = gridButton.defaultColor.invert();
+				setBackground(color);
+			}
+			
+			private void setBackground(Color color) {
+				BackgroundFill fill = new BackgroundFill(color, null, null);
+				Background background = new Background(fill);
+				button.setBackground(background);
 			}
 		});
 
 		button.setOnMouseExited(new EventHandler<MouseEvent>() {
-			private Button gridButton = button;
-			private Background white = whiteBackground;
+			private CoordButton gridButton = coordButton;
 
 			@Override
 			public void handle(MouseEvent event) {
-				if (!gridButton.equals(selected))
-					gridButton.setBackground(white);
+				Color color = gridButton.defaultColor;
+				setBackground(color);
+			}
+			
+			private void setBackground(Color color) {
+				BackgroundFill fill = new BackgroundFill(color, null, null);
+				Background background = new Background(fill);
+				button.setBackground(background);
 			}
 		});
 	}
 
 	private void selectButton(CoordButton button) {
-		if (selected != null)
-			setSelectedBackground(whiteBackground);
-		if (!button.equals(selected)) {
-			selected = button;
-			setSelectedBackground(orangeBackground);
-		} else {
-			selected = null;
+		if (canSelect) {
+			if (button.isSelectable) {
+				if (selected != null) {
+					setSelectedBackground(selectedPreviousColor);
+				}
+				if (!button.equals(selected)) {
+					selected = button;
+					selectedPreviousColor = selected.defaultColor;
+					setSelectedBackground(Color.ORANGE);
+				} else {
+					selected = null;
+				}
+			}
 		}
 	}
-
-	private void setSelectedBackground(Background background) {
-		if (selected != null)
-			selected.setBackground(background);
+	
+	public void waitForFire() {
+		canSelect = false;
 	}
 
-	private void setTargetAction(CoordButton button) {
+	private void setSelectedBackground(Color color) {
+		BackgroundFill fill = new BackgroundFill(color, null, null);
+		Background background = new Background(fill);
+		if (selected != null) {
+			selected.defaultColor = color;
+			selected.BUTTON.setBackground(background);
+		}
+	}
+	
+	public void fire(boolean hit) {
+		selected.isSelectable = false;
+		Color color = hit ? Color.RED : Color.AQUAMARINE;
+		setSelectedBackground(color);
+		selected = null;
+		canSelect = true;
+	}
+
+	private void setTargetAction(CoordButton coordButton) {
+		Button button = coordButton.BUTTON;
 		button.setOnAction( e ->  {
-			selectButton(button);
+			selectButton(coordButton);
 		});
 	}
-
-	public int getSelectedColumn() {
-		return selected.column;
+	
+	public Point getSelectedPoint() {
+		return selected == null ? null : selected.POINT;
 	}
 
-	public int getSelectedRow() {
-		return selected.row;
-	}
-
-	public void setActive(boolean isActive) {
-		this.isActive = isActive;
-	}
-
-	private class CoordButton extends Button {
-		public final int column;
-		public final int row;
-
+	private class CoordButton {
+		private final Point POINT;
+		private final Button BUTTON;
+		private Color defaultColor;
+		private boolean isSelectable;
+		
+		public CoordButton(Point point) {
+			this(point.column, point.row);
+		}
+		
 		public CoordButton(int column, int row) {
-			super();
-			this.column = column;
-			this.row = row;
+			BUTTON = new Button();
+			POINT = new Point(column, row);
+			defaultColor = Color.WHITE;
+			isSelectable = true;
 		}
 	}
 }

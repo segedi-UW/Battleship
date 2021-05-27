@@ -1,26 +1,25 @@
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.BorderPane;
-import javafx.geometry.Pos;
-import javafx.geometry.Insets;
-import javafx.collections.ObservableList;
-import javafx.application.Platform;
+import javafx.scene.layout.VBox;
 public class HomeScene {
 
 	private static final int HOME_SIZE = 500;
 
 	private Scene scene;
-	private Gui gui;
 
-	public static Scene create(Gui gui) {
-		HomeScene home = new HomeScene(gui);
+	public static Scene create() {
+		HomeScene home = new HomeScene();
 		return home.scene;
 	}
 
-	private HomeScene(Gui gui) {
-		this.gui = gui;
+	private HomeScene() {
 		BorderPane borderPane = new BorderPane();
 		scene = new Scene(borderPane, HOME_SIZE, HOME_SIZE);
 
@@ -45,9 +44,9 @@ public class HomeScene {
 		final int FONT_SIZE = 50;
 		final int INSET_BOTTOM = 50;
 		label.setStyle("-fx-font-size: " + FONT_SIZE + "px;");
-		vbox.setMargin(label, new Insets(0, 0, INSET_BOTTOM, 0));
+		VBox.setMargin(label, new Insets(0, 0, INSET_BOTTOM, 0));
 
-		ObservableList list = vbox.getChildren();
+		ObservableList<Node> list = vbox.getChildren();
 		list.add(label);
 	}
 
@@ -57,12 +56,12 @@ public class HomeScene {
 		Button singleplayer= new Button("Singleplayer");
 		singleplayer.setPrefSize(WIDTH, HEIGHT);
 		singleplayer.setOnAction(e -> {
-			gui.startSingleplayer();
+			Gui.startSingleplayer();
 		});
 		Button multiplayer= new Button("Play"); // TODO After adding single, rename
 		multiplayer.setPrefSize(WIDTH, HEIGHT);
 		multiplayer.setOnAction(e -> {
-			gui.showMultiplayerDialog();
+			Gui.showMultiplayerDialog();
 		});
 		Button help = new Button("Help");
 		help.setPrefSize(WIDTH, HEIGHT);
@@ -75,7 +74,7 @@ public class HomeScene {
 			Platform.exit();
 		});
 
-		ObservableList list = vbox.getChildren();
+		ObservableList<Node> list = vbox.getChildren();
 		// list.add(singleplayer); // TODO Add back in after implementing
 		list.add(multiplayer);
 		list.add(help);
@@ -94,6 +93,6 @@ public class HomeScene {
 			"you will have additional weapon systems available to you to unleash on " +
 			"enemies.";
 		// TODO Add advanced weapon systems tutorial
-		gui.showMessageAlert(title, message);
+		Gui.showMessageAlert(title, message);
 	}
 }

@@ -1,13 +1,12 @@
 import java.util.Random;
 import java.net.ServerSocket;
-import java.net.SocketException;
 import java.io.IOException;
 import java.lang.Thread;
 
 /**
  * An object that handles a ChatServer with a ChatClient
  */
-public class ChatServer extends ChatSocket implements Runnable {
+public class ConnectorServer extends Connector implements Runnable {
 
 	private ServerSocket serverSocket;
 	private int port;
@@ -16,7 +15,7 @@ public class ChatServer extends ChatSocket implements Runnable {
 
 	private final int UNRESERVED_PORTS = 1024; // The start of the unreserved port numbers
 
-	public ChatServer() {
+	public ConnectorServer() {
 		isConnected = false;
 		reservePort();
 	}

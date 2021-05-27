@@ -1,7 +1,6 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.application.Platform;
@@ -11,37 +10,33 @@ import javafx.concurrent.Task;
 
 public class Gui extends Application {
 
-	private final Scene HOME;
+	private static final Scene HOME = HomeScene.create();
 
-	private Stage stage;
+	private static Stage mainStage;
 	
 	public static void main(String[] args) {
 		Application.launch();
 	}
 
-	public Gui() {
-		HOME = HomeScene.create(this);
-	}
-
 	@Override
 	public void start(Stage stage) {
-		this.stage = stage;
+		mainStage = stage;
 		stage.setTitle("Battleship - War at Sea");
 		stage.setScene(HOME);
 		stage.show();
 	}
 
-	public void startSingleplayer() {
+	public static void startSingleplayer() {
 		// showBattleScreen();
 		// TODO
 	}
 
-	public void showMultiplayerDialog() {
+	public static void showMultiplayerDialog() {
 		String hostChoice = "Host Game";
 		String joinChoice = "Join Game";
 		String title = "Game Connect";
 		String header = "Host or Join a Game?";
-		ChoiceDialog dialog = new ChoiceDialog(hostChoice, hostChoice, joinChoice);
+		ChoiceDialog<Object> dialog = new ChoiceDialog<Object>(hostChoice, hostChoice, joinChoice);
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
 		dialog.showAndWait().ifPresent(response -> {
@@ -52,23 +47,26 @@ public class Gui extends Application {
 		});
 	}
 
-	private void showJoinDialog() {
+	private static void showJoinDialog() {
 		JoinDialog dialog = new JoinDialog();
 		dialog.showAndWait().ifPresent(response -> {
 			joinGame(response);
 		});
 	}
 
-	private void joinGame(Address address) {
+	private static void joinGame(Address address) {
 		System.out.println("Joining... " + address.port);
-		ChatClient client = new ChatClient(address.ip, address.port);
-		client.connect();
-		// Encoder.setSocket(client); TODO
+		Connector connector = new ConnectorClient(address.ip, address.port);
+		connector.connect();
+		Game.setConnector(connector);
 		System.out.println("Connected to game");
 		showBattleScreen();
+		Game.log("...Waiting on opponent...");
+		final boolean IS_FIRST = false;
+		Game.startGame(IS_FIRST);
 	}
 
-	public void showMessageAlert(String TITLE, String MESSAGE) {
+	public static void showMessageAlert(String TITLE, String MESSAGE) {
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setHeaderText(TITLE);
 		TextArea area = new TextArea(MESSAGE);
@@ -77,24 +75,40 @@ public class Gui extends Application {
 		alert.show();
 	}
 
-	private void showBattleScreen() {
+	private static void showBattleScreen() {
 		Scene scene = BattleScene.create();
-		stage.setScene(scene);
+		mainStage.setScene(scene);
 	}
 
-	private void hostGame() {
-		ChatServer server = new ChatServer();
+	private static void hostGame() {
+		ConnectorServer server = new ConnectorServer();
+		Game.setConnector(server);
 		Alert alert = createHostingAlert(server);
 		startConnectToClientTask(server, alert);
 		alert.showAndWait();
 
 		if (server.isConnected()) {
-			//Encoder.setSocket(server); // TODO
 			showBattleScreen();
+			final boolean IS_FIRST = true;
+			Game.startGame(IS_FIRST);
 		}
 	}
-
-	private Alert createHostingAlert(ChatServer server) {
+	
+	public static void exitToHome(String message) {
+		Platform.runLater(() -> {
+			Alert.AlertType type = Alert.AlertType.ERROR;
+			Alert alert = new Alert(type, message);
+			alert.showAndWait();
+			mainStage.setScene(HOME);
+		});
+	}
+	
+	public static void closeToHome(String message) {
+		Game.getConnector().close();
+		exitToHome(message);
+	}
+	
+	private static Alert createHostingAlert(ConnectorServer server) {
 		final String TITLE = "Hosting Game";
 		final String MESSAGE = "Looking for connection on " 
 			+ server.getIP() + " at port " + server.getPort();
@@ -102,38 +116,43 @@ public class Gui extends Application {
 		Alert alert = new Alert(Alert.AlertType.INFORMATION, MESSAGE, CANCEL);
 		alert.setHeaderText(TITLE);
 		alert.setOnCloseRequest(e -> {
-			if (!server.isConnected()) 
+			if (!server.isConnected()) {
 				closeServer(server);
+				System.out.println("Canceled Hosting");
+			}
 		});
 
 		System.out.println(MESSAGE);
 		return alert;
 	}
 
-	private void closeServer(ChatServer server) {
+	private static void closeServer(ConnectorServer server) {
 		System.out.println("Canceling Connection");
 		server.close();
 	}
 
-	private void startConnectToClientTask(ChatServer server, Alert alert) {
+	private static void startConnectToClientTask(ConnectorServer server, Alert alert) {
 		Task<Void> task = new Task<>() {
 			@Override
 			public Void call() {
 				server.connect();
-				closeAlert(alert);
+				if (server.isConnected()) {
+					System.out.println("Connected to game");
+					closeAlert(alert);
+				}
 				return null;
 			}
 		};
 		startTask(task);
 	}
 
-	private void startTask(Task task) {
+	private static void startTask(Task<Void> task) {
 		Thread thread = new Thread(task);
 		thread.setDaemon(true);
 		thread.start();
 	}
 
-	private void closeAlert(Alert alert) {
+	private static void closeAlert(Alert alert) {
 		Platform.runLater(() -> {
 			alert.close();
 		});

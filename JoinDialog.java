@@ -1,21 +1,19 @@
 import javafx.scene.layout.GridPane;
-import javafx.geometry.Pos;
 import javafx.geometry.HPos;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ButtonBar.ButtonData;
+
 public class JoinDialog extends Dialog<Address> {
 
-	private Address address;
 	private TextField ipField;
 	private TextField portField;
 	private ButtonType joinButton;
 
 	JoinDialog() {
 		super();
-		address = new Address();
 		setupDialog();
 		setupConverter();
 	}
@@ -45,7 +43,7 @@ public class JoinDialog extends Dialog<Address> {
 		Label ipLabel = new Label("Enter ip address: ");
 		final int ipLabelCol = 0;
 		final int ipLabelRow = 0;
-		grid.setHalignment(ipLabel, HPos.RIGHT);
+		GridPane.setHalignment(ipLabel, HPos.RIGHT);
 		grid.add(ipLabel, ipLabelCol, ipLabelRow);
 	}
 
@@ -53,7 +51,7 @@ public class JoinDialog extends Dialog<Address> {
 		Label portLabel = new Label("Enter port: ");
 		final int portLabelCol = 0;
 		final int portLabelRow = 1;
-		grid.setHalignment(portLabel, HPos.RIGHT); 
+		GridPane.setHalignment(portLabel, HPos.RIGHT); 
 		grid.add(portLabel, portLabelCol, portLabelRow);
 	}
 

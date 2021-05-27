@@ -1,12 +1,7 @@
-public class Battleship implements Ship {
+public class Battleship extends Ship {
 
-	@Override
-	public void specialAttack() {
-		// TODO
+	public Battleship() {
+		super(Ship.Type.BATTLESHIP);
 	}
 
-	@Override
-	public boolean isDestroyed() {
-		return false;
-	}
 }

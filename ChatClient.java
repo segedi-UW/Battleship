@@ -1,12 +1,12 @@
 import java.io.IOException;
 import java.net.Socket;
 
-public class ChatClient extends ChatSocket {
+public class ConnectorClient extends Connector {
 
 	private String ip;
 	private int port;
 
-	public ChatClient(String ip, int port) {
+	public ConnectorClient(String ip, int port) {
 		this.ip = ip;
 		this.port = port;
 	}

@@ -1,27 +1,26 @@
 import java.net.Socket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.io.IOException;
 import java.lang.Thread;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.InputStreamReader;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.LinkedList;
 
-public abstract class ChatSocket {
+public abstract class Connector {
 
 	private Socket socket;
 	private Writer writer;
 	private Reader reader;
-	private LinkedBlockingQueue<String> queue;
+	private LinkedList<MessageListener> listeners;
 
 	private class Reader implements Runnable {
 
 		private BufferedReader reader;
 		private boolean running;
-		private ChatSocket chatSocket;
+		private Connector chatSocket;
 
-		public Reader(ChatSocket chatSocket) {
+		public Reader(Connector chatSocket) {
 			this.chatSocket = chatSocket;
 			try {
 				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -44,10 +43,12 @@ public abstract class ChatSocket {
 					running = false;
 					return;
 				}
-				chatSocket.addMessage(input);
+				chatSocket.readMessage(input);
 			} catch (IOException e) {
 				running = false;
-				System.out.println("Error reading: " + e.getMessage());
+				String error = "Error reading: " + e.getMessage();
+				System.out.println(error);
+				Gui.exitToHome(error);
 			}
 		}
 
@@ -59,9 +60,6 @@ public abstract class ChatSocket {
 			}
 		}
 
-		public boolean isRunning() {
-			return running;
-		}
 	}
 
 	private class Writer {
@@ -103,8 +101,8 @@ public abstract class ChatSocket {
 		thread.start();
 	}
 
-	public ChatSocket() {
-		queue = new LinkedBlockingQueue<>();
+	public Connector() {
+		listeners = new LinkedList<>();
 	}
 
 	protected void connect(String ip, int port) throws IOException {
@@ -118,23 +116,24 @@ public abstract class ChatSocket {
 		startDaemon(reader);
 	}
 
-	public void addMessage(String str) {
-		queue.add(str);
-	}
-
-	public String getMessage() {
-		try {
-			return queue.take();
-		} catch (InterruptedException e) {
-			System.out.println("Error taking message: " + e.getMessage());
+	private void readMessage(String str) {
+		for (MessageListener listener : listeners) {
+			listener.messageRecieved(str);
 		}
-		return null;
+	}
+	
+	public void addListener(MessageListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void removeListener(MessageListener listener) {
+		listeners.remove(listener);
 	}
 
-	public boolean hasMessage() {
-		return queue.size() > 0;
+	public void clearListeners() {
+		listeners.clear();
 	}
-
+	
 	public void write(String str) {
 		if (writer.isOpen()) {
 			writer.write(str);

@@ -1,22 +1,11 @@
 public class Encoder {
 
-	private enum Regex {
-		ROW("#R"), COLUMN("#C");
-
-		private String regex;
-
-		private Regex(String regex) {
-			this.regex = regex;
-		}
-
-		@Override
-		public String toString() {
-			return regex;
-		}
-	}
+	private static String REGEX = ";";
 
 	public enum Code {
-		ATTACK("$ATTACK#"), HIT("$HIT#"), MISS("$MISS#"), SUNK("$SUNK#"), CHAT("$:");
+		ATTACK("$ATTACK#"), HIT("$HIT#"), MISS("$MISS#"), SUNK("$SUNK#"), 
+		CHAT("$:"), TURN_START("$TURN#"), READY("$READY#"), LOST("$LOST#"),
+		WON("$WON#");
 
 		public final String code;
 
@@ -25,22 +14,22 @@ public class Encoder {
 		}
 	}
 
-	public static String encodeAttack(int column, int row) {
-		final String COLUMN_REGEX = Regex.COLUMN.regex;
-		final String ROW_REGEX = Regex.ROW.regex;
-		return Code.ATTACK.code + COLUMN_REGEX + column + ROW_REGEX + row;
+	public static String encodeAttack(Point point) {
+		return Code.ATTACK.code + point.column + REGEX + point.row;
+	}
+	
+	public static Point decodeAttack(String message) {
+		String decoded = decode(message);
+		String[] split = decoded.split(REGEX);
+		int column = Integer.parseInt(split[0]);
+		int row = Integer.parseInt(split[1]);
+		return new Point(column, row);
 	}
 
-	public static String encodeHit() {
-		return Code.HIT.code;
-	}
-
-	public static String encodeMiss() {
-		return Code.MISS.code;
-	}
-
-	public static String encodeSunk() {
-		return Code.SUNK.code;
+	public static String encodeState(Code code) {
+		if (code == Code.ATTACK || code == Code.CHAT)
+			throw new IllegalArgumentException("The Chat or Attack code is not a state: " + code);
+		return code.code;
 	}
 
 	public static String encodeChat(String message) {
@@ -48,22 +37,18 @@ public class Encoder {
 	}
 
 	public static Code parseCode(String message) {
-		if (message.startsWith(Code.ATTACK.code)) {
-			return Code.ATTACK;
-		} else if (message.startsWith(Code.HIT.code)) {
-			return Code.HIT;
-		} else if (message.startsWith(Code.MISS.code)) {
-			return Code.MISS;
-		} else if (message.startsWith(Code.CHAT.code)) {
-			return Code.CHAT;
-		} else if (message.startsWith(Code.SUNK.code)) {
-			return Code.SUNK;
+		Code[] codes = Code.values();
+		for (int i = 0; i < codes.length; i++) {
+			Code code = codes[i];
+			if (message.startsWith(code.code))
+				return code;
 		}
-		return null;
+		
+		throw new NullPointerException("Could not parse code");
 	}
 
 	public static String decode(String message) {
 		Code code = parseCode(message);
-		return message.substring(code.code.length() - 1);
+		return message.substring(code.code.length());
 	}
 }

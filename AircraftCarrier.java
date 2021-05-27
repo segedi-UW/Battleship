@@ -1,12 +1,7 @@
-public class AircraftCarrier implements Ship {
-
-	@Override
-	public void specialAttack() {
-
+public class AircraftCarrier extends Ship {
+	
+	public AircraftCarrier() {
+		super(Ship.Type.AIRCRAFT_CARRIER);
 	}
 
-	@Override
-	public boolean isDestroyed() {
-		return false;
-	}
 }
