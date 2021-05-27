@@ -13,6 +13,7 @@ public class Gui extends Application {
 	private static final Scene HOME = HomeScene.create();
 
 	private static Stage mainStage;
+	private static Game game;
 	
 	public static void main(String[] args) {
 		Application.launch();
@@ -55,24 +56,31 @@ public class Gui extends Application {
 	}
 
 	private static void joinGame(Address address) {
+		game = new Game();
 		System.out.println("Joining... " + address.port);
 		Connector connector = new ConnectorClient(address.ip, address.port);
 		connector.connect();
-		Game.setConnector(connector);
+		game.setConnector(connector);
 		System.out.println("Connected to game");
 		showBattleScreen();
-		Game.log("...Waiting on opponent...");
+		game.log("...Waiting on opponent...");
 		final boolean IS_FIRST = false;
-		Game.startGame(IS_FIRST);
+		game.startGame(IS_FIRST);
 	}
 
 	public static void showMessageAlert(String TITLE, String MESSAGE) {
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setHeaderText(TITLE);
-		TextArea area = new TextArea(MESSAGE);
-		area.setWrapText(true);
-		alert.getDialogPane().setContent(area);
-		alert.show();
+		Platform.runLater(() -> {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setHeaderText(TITLE);
+			TextArea area = new TextArea(MESSAGE);
+			area.setWrapText(true);
+			alert.getDialogPane().setContent(area);
+			alert.showAndWait();
+		});
+	}
+	
+	public static Game getGame() {
+		return game;
 	}
 
 	private static void showBattleScreen() {
@@ -81,8 +89,9 @@ public class Gui extends Application {
 	}
 
 	private static void hostGame() {
+		game = new Game();
 		ConnectorServer server = new ConnectorServer();
-		Game.setConnector(server);
+		game.setConnector(server);
 		Alert alert = createHostingAlert(server);
 		startConnectToClientTask(server, alert);
 		alert.showAndWait();
@@ -90,13 +99,13 @@ public class Gui extends Application {
 		if (server.isConnected()) {
 			showBattleScreen();
 			final boolean IS_FIRST = true;
-			Game.startGame(IS_FIRST);
+			game.startGame(IS_FIRST);
 		}
 	}
 	
 	public static void exitToHome(String message) {
 		Platform.runLater(() -> {
-			Alert.AlertType type = Alert.AlertType.ERROR;
+			Alert.AlertType type = Alert.AlertType.INFORMATION;
 			Alert alert = new Alert(type, message);
 			alert.showAndWait();
 			mainStage.setScene(HOME);
@@ -104,7 +113,7 @@ public class Gui extends Application {
 	}
 	
 	public static void closeToHome(String message) {
-		Game.getConnector().close();
+		game.getConnector().close();
 		exitToHome(message);
 	}
 	

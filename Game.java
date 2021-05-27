@@ -1,26 +1,36 @@
 import java.util.Optional;
 
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 
 public class Game {
-	
+
 	public enum Gamemode {
 		STANDARD, SALVO, ADVANCED;
 	}
-	
-	private static Gamemode gamemode = Gamemode.STANDARD;
-	private static boolean isTurn = false;
-	private static Connector connection;
-	private static TextArea console = createConsole();
-	private static HomeBoard board = new HomeBoard();
-	private static TargetBoard target = new TargetBoard();
-	private static int ships;
-	
-	private static boolean isOpponentReady;
-	
-	private static TextArea createConsole() {
+
+	private Gamemode gamemode;
+	private boolean isTurn;
+	private Connector connection;
+	private TextArea console;
+	private HomeBoard board;
+	private TargetBoard target;
+	private int ships;
+
+	private boolean isOpponentReady;
+
+	public Game() {
+		gamemode = Gamemode.STANDARD;
+		isTurn = false;
+		console = createConsole();
+		board = new HomeBoard();
+		target = new TargetBoard();
+		ships = 5;
+	}
+
+	private TextArea createConsole() {
 		final int height = 100;
 		final int width = 200;
 		final boolean editable = false;
@@ -35,7 +45,7 @@ public class Game {
 		return area;
 	}
 
-	public static void fire(Point point) {
+	public void fire(Point point) {
 		if (!isOpponentReady)
 			log("Waiting for Opponent...");
 		if (!isTurn)
@@ -47,17 +57,17 @@ public class Game {
 			isTurn = false;
 		}
 	}
-	
-	public static boolean isTurn() {
+
+	public boolean isTurn() {
 		return isTurn;
 	}
 
-	private static void enemyAttack(Point point) {
+	private void enemyAttack(Point point) {
 		String text = "The enemy has fired upon us!";
 		log(text);
 		board.attack(point);
 		Encoder.Code code = board.getLastCode();
-		
+
 		if (code == Encoder.Code.MISS)
 			log("They missed!");
 		else if (code == Encoder.Code.HIT)
@@ -68,24 +78,24 @@ public class Game {
 			log("We have " + ships + " ships left Commander.");
 		} else
 			throw new IllegalArgumentException("lastCode was invalid: " + code);
-		
+
 		connection.write(Encoder.encodeState(code));
 		if (ships == 0) {
 			log("We have lost Commander...");
 			connection.write(Encoder.encodeState(Encoder.Code.LOST));
 		}
 	}
-	
-	public static void setConnector(Connector connector) {
+
+	public void setConnector(Connector connector) {
 		connection = connector;
 		setupConnection();
 	}
-	
-	private static void setupConnection() {
+
+	private void setupConnection() {
 		final boolean HIT = true;
 		final boolean MISSED = false;
 		isOpponentReady = false;
-		
+
 		connection.addListener((message) -> {
 			Encoder.Code code = Encoder.parseCode(message);
 			if (code == Encoder.Code.ATTACK) {
@@ -125,52 +135,54 @@ public class Game {
 			}
 		});
 	}
-	
-	private static void sendTurn() {
+
+	private void sendTurn() {
 		connection.write(Encoder.encodeState(Encoder.Code.TURN_START));
 		String text = "...Waiting on opponent...";
 		log(text);
 	}
-	
-	private static void startTurn() {
+
+	private void startTurn() {
 		isTurn = true;
 		String text = "Captain what are your orders!";
 		log(text);
 	}
-	
-	private static void setupShips() {
-		ShipDialog dialog = null;
-		try {
-			AircraftCarrier carrier = new AircraftCarrier();
-			dialog = new ShipDialog(carrier);
-			setupShip(dialog);
 
-			Battleship battle = new Battleship();
-			dialog = new ShipDialog(battle);
-			setupShip(dialog);
-				
-			Destroyer destroyer = new Destroyer();
-			dialog = new ShipDialog(destroyer);
-			setupShip(dialog);
-				
-			Submarine sub = new Submarine();
-			dialog = new ShipDialog(sub);
-			setupShip(dialog);
-				
-			Uboat uboat = new Uboat();
-			dialog = new ShipDialog(uboat);
-			setupShip(dialog);
-		} catch (Exception e) {
-			if (dialog != null)
-				dialog.close();
-			Gui.closeToHome(e.getMessage());
-			return;
-		}
-		
-		connection.write(Encoder.encodeState(Encoder.Code.READY));
+	private void setupShips() {
+		Platform.runLater(() -> {
+			ShipDialog dialog = null;
+			try {
+				AircraftCarrier carrier = new AircraftCarrier();
+				dialog = new ShipDialog(carrier);
+				setupShip(dialog);
+
+				Battleship battle = new Battleship();
+				dialog = new ShipDialog(battle);
+				setupShip(dialog);
+
+				Destroyer destroyer = new Destroyer();
+				dialog = new ShipDialog(destroyer);
+				setupShip(dialog);
+
+				Submarine sub = new Submarine();
+				dialog = new ShipDialog(sub);
+				setupShip(dialog);
+
+				Uboat uboat = new Uboat();
+				dialog = new ShipDialog(uboat);
+				setupShip(dialog);
+			} catch (Exception e) {
+				if (dialog != null)
+					dialog.close();
+				Gui.closeToHome(e.getMessage());
+				return;
+			}
+
+			connection.write(Encoder.encodeState(Encoder.Code.READY));
+		});
 	}
-	
-	private static void setupShip(ShipDialog dialog) throws Exception {
+
+	private void setupShip(ShipDialog dialog) throws Exception {
 		Optional<Boolean> response = dialog.showAndWait();
 		if (!response.isPresent()) {
 			throw new Exception("Canceled Selection");
@@ -181,37 +193,37 @@ public class Game {
 			}
 		}
 	}
-	
-	public static void log(String text) {
+
+	public void log(String text) {
 		final double END = 1.0;
 		console.appendText(text + "\n");
 		console.setScrollTop(END);
 	}
-	
-	public static Connector getConnector() {
+
+	public Connector getConnector() {
 		return connection;
 	}
-	
-	public static void startGame(boolean isFirst) {
+
+	public void startGame(boolean isFirst) {
 		setupShips();
 		ships = 5;
 		if (isFirst)
 			startTurn();
 	}
 
-	public static VBox getConsole() {
+	public VBox getConsole() {
 		Button clear = new Button("Clear");
 		clear.setOnAction(event -> {
 			console.clear();
 		});
 		return new VBox(console, clear);
 	}
-	
-	public static HomeBoard getBoard() {
+
+	public HomeBoard getBoard() {
 		return board;
 	}
-	
-	public static TargetBoard getTarget() {
+
+	public TargetBoard getTarget() {
 		return target;
 	}
 }

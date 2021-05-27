@@ -17,6 +17,7 @@ public class BattleScene {
 
 	private Scene scene;
 	private BorderPane pane;
+	private Game game;
 
 	public static Scene create() {
 		BattleScene battle = new BattleScene();
@@ -26,6 +27,7 @@ public class BattleScene {
 	private BattleScene() {
 		pane = new BorderPane();
 		scene = new Scene(pane, BATTLE_SIZE, BATTLE_SIZE);
+		game = Gui.getGame();
 
 		createBattleScene();
 	}
@@ -45,7 +47,7 @@ public class BattleScene {
 	}
 
 	private void addBattleCenter() {
-
+		
 		VBox vbox = new VBox();
 		vbox.setAlignment(Pos.CENTER);
 		vbox.setBackground(null);
@@ -53,11 +55,11 @@ public class BattleScene {
 		Label targetLabel = new Label("Targeting Grid");
 
 		Label boardLabel = new Label("Local Waters Grid");
-		HomeBoard board = Game.getBoard();
+		HomeBoard board = game.getBoard();
 
 		ObservableList<Node> list = vbox.getChildren();
 		list.add(targetLabel);
-		TargetBoard target = Game.getTarget();
+		TargetBoard target = game.getTarget();
 		list.add(target.getPane());
 		list.add(boardLabel);
 		list.add(board.getPane());
@@ -66,7 +68,7 @@ public class BattleScene {
 	}
 
 	private void addBattleLeft() {
-		Chat chat = new Chat(Game.getConnector());
+		Chat chat = new Chat(game.getConnector());
 		pane.setLeft(chat.getDisplay());
 	}
 
@@ -80,14 +82,14 @@ public class BattleScene {
 		final double HEIGHT = 40.0;
 		fire.setPrefSize(WIDTH, HEIGHT);
 		fire.setOnAction(e -> {
-			TargetBoard target = Game.getTarget();
+			TargetBoard target = game.getTarget();
 			Point point = target.getSelectedPoint();
 			if (point != null)
-				Game.fire(point);
+				game.fire(point);
 		});
 		// TODO Add other buttons
 		
-		VBox console = Game.getConsole();
+		VBox console = game.getConsole();
 		VBox vbox = new VBox(fire, console);
 		final int RIGHT = 40;
 		VBox.setMargin(fire, new Insets(0,RIGHT,0,0));
