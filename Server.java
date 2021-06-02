@@ -1,7 +1,8 @@
-import java.util.Random;
-import java.net.ServerSocket;
 import java.io.IOException;
-import java.lang.Thread;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.UnknownHostException;
+import java.util.Random;
 
 /**
  * An object that handles a ChatServer with a ChatClient
@@ -65,9 +66,23 @@ public class Server extends Connector implements Runnable {
 	}
 
 	/**
-	 * Returns the host ip address
+	 * Returns the host ip address. Used to connecto to this host.
 	 * 
-	 * @return the used ip address.
+	 * @return The local host ip addresss.
+	 */
+	public String getHost() {
+		try {
+			return InetAddress.getLocalHost().getCanonicalHostName();
+		} catch (UnknownHostException e) {
+			return "Unknown Address";
+		}
+	}
+	
+	/**
+	 * Returns the other end of the socket's ip address
+	 * 
+	 * @return the in use end ip address. If 0.0.0.0 is returned there is no
+	 * connection made yet.
 	 */
 	public String getIP() {
 		return serverSocket.getInetAddress().getCanonicalHostName();

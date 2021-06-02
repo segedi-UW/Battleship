@@ -1,12 +1,14 @@
+import java.net.InetAddress;
+
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextArea;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ChoiceDialog;
 import javafx.concurrent.Task;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.TextArea;
+import javafx.stage.Stage;
 
 /**
  * An object that handles the Gui parts of this program.
@@ -179,7 +181,7 @@ public class Gui extends Application {
 	private static Alert createHostingAlert(Server server) {
 		final String TITLE = "Hosting Game";
 		final String MESSAGE = "Looking for connection on " 
-			+ server.getIP() + " at port " + server.getPort();
+			+ server.getHost() + " at port " + server.getPort();
 		final ButtonType CANCEL = ButtonType.CANCEL;
 		Alert alert = new Alert(Alert.AlertType.INFORMATION, MESSAGE, CANCEL);
 		alert.setHeaderText(TITLE);
