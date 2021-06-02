@@ -1,5 +1,3 @@
-import java.net.InetAddress;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -7,8 +5,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 /**
  * An object that handles the Gui parts of this program.
@@ -20,21 +20,21 @@ public class Gui extends Application {
 
 	private static final Scene HOME = HomeScene.create();
 
-	private static Stage mainStage;
+	private static Stage stage;
 	private static Game game;
 	
 	/**
 	 * Launches the GUI Application
 	 * 
-	 * @param args the commandline arguments (unused).
+	 * @param args the command line arguments (unused).
 	 */
 	public static void main(String[] args) {
 		Application.launch();
 	}
 
 	@Override
-	public void start(Stage stage) {
-		mainStage = stage;
+	public void start(Stage mainStage) {
+		stage = mainStage;
 		stage.setTitle("Battleship - War at Sea");
 		stage.setScene(HOME);
 		stage.show();
@@ -57,6 +57,7 @@ public class Gui extends Application {
 		String title = "Game Connect";
 		String header = "Host or Join a Game?";
 		ChoiceDialog<Object> dialog = new ChoiceDialog<Object>(hostChoice, hostChoice, joinChoice);
+		centerOnStage(dialog);
 		dialog.setTitle(title);
 		dialog.setHeaderText(header);
 		dialog.showAndWait().ifPresent(response -> {
@@ -66,12 +67,23 @@ public class Gui extends Application {
 				showJoinDialog();
 		});
 	}
+	
+	public static <T> void centerOnStage(Dialog<T> dialog) {
+		final int divisor = 4; // estimation accounting for size of most dialogs
+		
+		double stageCenterX = stage.getX() + (stage.getWidth() / divisor);
+		double stageCenterY = stage.getY() + (stage.getHeight() / divisor);
+		
+		dialog.setX(stageCenterX);
+		dialog.setY(stageCenterY);
+	}
 
 	/**
 	 * Shows the join game Dialog.
 	 */
 	private static void showJoinDialog() {
 		JoinDialog dialog = new JoinDialog();
+		centerOnStage(dialog);
 		dialog.showAndWait().ifPresent(response -> {
 			joinGame(response);
 		});
@@ -104,6 +116,7 @@ public class Gui extends Application {
 	public static void showMessageAlert(String TITLE, String MESSAGE) {
 		Platform.runLater(() -> {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			centerOnStage(alert);
 			alert.setHeaderText(TITLE);
 			TextArea area = new TextArea(MESSAGE);
 			area.setWrapText(true);
@@ -120,13 +133,17 @@ public class Gui extends Application {
 	public static Game getGame() {
 		return game;
 	}
+	
+	public static Window getWindow() {
+		return Stage.getWindows().get(0);
+	}
 
 	/**
 	 * Displays the Battle Screen (game play screen).
 	 */
 	private static void showBattleScreen() {
 		Scene scene = BattleScene.create();
-		mainStage.setScene(scene);
+		stage.setScene(scene);
 	}
 
 	/**
@@ -157,7 +174,7 @@ public class Gui extends Application {
 			Alert.AlertType type = Alert.AlertType.INFORMATION;
 			Alert alert = new Alert(type, message);
 			alert.showAndWait();
-			mainStage.setScene(HOME);
+			stage.setScene(HOME);
 		});
 	}
 	
@@ -184,6 +201,7 @@ public class Gui extends Application {
 			+ server.getHost() + " at port " + server.getPort();
 		final ButtonType CANCEL = ButtonType.CANCEL;
 		Alert alert = new Alert(Alert.AlertType.INFORMATION, MESSAGE, CANCEL);
+		centerOnStage(alert);
 		alert.setHeaderText(TITLE);
 		alert.setOnCloseRequest(e -> {
 			if (!server.isConnected()) {
