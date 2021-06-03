@@ -117,13 +117,6 @@ public class TargetBoard extends Board {
 	}
 	
 	/**
-	 * Stops the change of selection until the fire method is called.
-	 */
-	public void waitForFire() {
-		canSelect = false;
-	}
-
-	/**
 	 * Sets the selected CoordButton's background to the passed color.
 	 * 
 	 * @param color the color to use in the new background.
@@ -147,7 +140,6 @@ public class TargetBoard extends Board {
 		Color color = hit ? Color.RED : Color.AQUAMARINE;
 		setSelectedBackground(color);
 		selected = null;
-		canSelect = true;
 	}
 
 	/**

@@ -81,7 +81,6 @@ public class Game {
 			log("We are still reloading Commander");
 		if (isTurn && isOpponentReady) {
 			log("Missles Away!");
-			target.waitForFire();
 			connection.write(Encoder.encodeAttack(point));
 			isTurn = false;
 		}
