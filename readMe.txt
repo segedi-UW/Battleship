@@ -7,5 +7,5 @@ You need to provide the JVM with the appropriate arguments as follows:
 2) java -cp "pathToJavaFiles;pathToSDKLib" --module-path "path to SDKLib"
 --add-modules javafx.controls,javafx.fxml Gui
 
-Note that the quotes are required for windows, and the semicolon is a colon on
-linux systems. I would keep the quotes for both systems.
+Note that although the quotes are only required for windows, and the semicolon
+is a colon on linux systems.
